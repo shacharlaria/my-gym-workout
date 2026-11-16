@@ -1,4 +1,250 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>אימון Full Body</title><style>body{font-family:system-ui,Arial;background:#f4f6fa;color:#172033;margin:0;padding:18px}main{max-width:700px;margin:auto}h1{margin-bottom:5px}.muted{color:#64748b}.card{background:white;border-radius:16px;padding:16px;margin:13px 0;box-shadow:0 2px 12px #17203312}.art{height:125px;background:#e9f1fc;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:64px;margin-bottom:10px}button{border:0;border-radius:10px;padding:12px 16px;background:#1e40af;color:white;font-weight:700;font-size:16px;cursor:pointer;margin:3px}button.secondary{background:#e2e8f0;color:#172033}.sets{display:flex;gap:6px;flex-wrap:wrap}.sets button{background:#dbeafe;color:#1e40af}.sets button.done{background:#15803d;color:white}.timer{position:sticky;top:0;background:#172033;color:white;border-radius:14px;padding:14px;z-index:3;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px}.timer button{background:#fff;color:#172033}#clock{font-size:27px;font-weight:800}small{color:#64748b}</style></head><body><main><h1>💪 אימון Full Body</h1><p class="muted">10 תרגילים · 55–65 דקות · מנוחה 60–90 שניות</p><section class="timer"><div>⏱️ טיימר מנוחה <span id="clock">01:00</span></div><div><button onclick="startTimer(60)">60 שנ׳</button><button onclick="startTimer(90)">90 שנ׳</button><button onclick="stopTimer()">עצור</button></div></section><div id="exercises"><div class="card">טוען תרגילים...</div></div><button class="secondary" onclick="resetAll()">אפס אימון</button><p><small>הנתונים נשמרים במכשיר ובדפדפן שבו פתחת את האתר. האיורים הם סמלים להמחשה.</small></p></main><script>
-const data=[['פשיטת ברכיים','ירך קדמית',3,'12','🦵'],['סקוואט לספסל','רגליים וישבן',3,'10','🏋️'],['דדליפט רומני עם משקולות','ירך אחורית וישבן',2,'10','🏋️'],['לחיצת חזה עם משקולות','חזה',3,'10–12','💪'],['פולי עליון','גב',3,'10–12','🏋️'],['לחיצת כתפיים עם משקולות','כתפיים',2,'10','💪'],['חתירה עם משקולת על ספסל','גב אמצעי',2,'12 לכל צד','🏋️'],['כפיפת מרפקים עם משקולות','יד קדמית',2,'12','💪'],['פשיטת מרפקים עם משקולת','יד אחורית',2,'12','💪'],['Bird Dog','בטן וליבה',2,'8 לכל צד','🧘']];
-let state={};try{state=JSON.parse(localStorage.getItem('gym-progress-v1')||'{}')}catch(e){}function save(){try{localStorage.setItem('gym-progress-v1',JSON.stringify(state))}catch(e){}}function toggle(i,j){state[i]??={};state[i][j]=!state[i][j];save();render()}function resetAll(){if(confirm('לאפס את כל הסימונים?')){state={};save();render()}}function render(){document.getElementById('exercises').innerHTML=data.map((d,i)=>`<article class="card"><div class="art" aria-hidden="true">${d[4]}</div><h2>${i+1}. ${d[0]}</h2><p class="muted">${d[1]} · ${d[2]} סטים × ${d[3]} חזרות</p><div class="sets">${Array.from({length:d[2]},(_,j)=>`<button class="${state[i]?.[j]?'done':''}" onclick="toggle(${i},${j})">סט ${j+1} ${state[i]?.[j]?'✓':'○'}</button>`).join('')}</div></article>`).join('')};render();let deadline=0,interval=null,remaining=60;function update(){let t=deadline?Math.max(0,Math.ceil((deadline-Date.now())/1000)):remaining;document.getElementById('clock').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');if(deadline&&t===0){clearInterval(interval);interval=null;deadline=0;remaining=0}}function startTimer(s){clearInterval(interval);remaining=s;deadline=Date.now()+s*1000;update();interval=setInterval(update,250)}function stopTimer(){if(deadline)remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));deadline=0;clearInterval(interval);interval=null;update()}update();
-</script></body></html>
+
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>אימון Full Body</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:system-ui,Arial;background:#f4f6fa;color:#172033;margin:0;padding:16px}
+main{max-width:720px;margin:auto}
+h1{margin-bottom:5px}
+h2{font-size:20px}
+.muted{color:#64748b}
+.card{background:white;border-radius:16px;padding:16px;margin:13px 0;box-shadow:0 2px 12px #17203312}
+.art{width:100%;height:190px;object-fit:contain;background:#edf2f8;border-radius:12px;margin-bottom:10px}
+.fallback{height:150px;background:#e9f1fc;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:60px}
+button{border:0;border-radius:10px;padding:12px 15px;background:#1e40af;color:white;font-weight:700;font-size:15px;cursor:pointer;margin:3px}
+button.secondary{background:#e2e8f0;color:#172033}
+.sets{display:flex;gap:6px;flex-wrap:wrap}
+.sets button{background:#dbeafe;color:#1e40af}
+.sets button.done{background:#15803d;color:white}
+.timer{position:sticky;top:0;background:#172033;color:white;border-radius:14px;padding:14px;z-index:3;text-align:center}
+.timer button{background:white;color:#172033}
+#clock{font-size:32px;font-weight:800;display:block;margin:8px}
+.progress{height:12px;background:#dbeafe;border-radius:20px;overflow:hidden}
+#bar{height:100%;width:0;background:#15803d;transition:width .2s}
+.instructions{background:#f1f5f9;padding:12px;border-radius:10px;line-height:1.7}
+small{color:#64748b}
+</style>
+</head>
+<body>
+<main>
+<h1>💪 אימון Full Body</h1>
+<p class="muted">10 תרגילים · כ־55–65 דקות · מנוחה 60–90 שניות</p>
+
+<section class="timer">
+  <strong>⏱️ טיימר מנוחה</strong>
+  <span id="clock">01:00</span>
+  <button onclick="startTimer(60)">60 שניות</button>
+  <button onclick="startTimer(90)">90 שניות</button>
+  <button onclick="stopTimer()">עצור</button>
+  <button onclick="resetTimer()">איפוס</button>
+</section>
+
+<div class="card">
+  <strong>התקדמות באימון</strong>
+  <p id="progressText">0 סטים הושלמו</p>
+  <div class="progress"><div id="bar"></div></div>
+</div>
+
+<div id="exercises"></div>
+
+<button class="secondary" onclick="resetAll()">אפס אימון</button>
+<p><small>הסימונים נשמרים בדפדפן. התמונות נטענות מהאינטרנט ומשמשות להמחשה.</small></p>
+</main>
+
+<script>
+const base="https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/";
+
+const data=[
+{
+name:"פשיטת ברכיים",
+muscle:"ירך קדמית",
+sets:3,reps:"12",
+image:"Leg_Extensions/0.jpg",
+icon:"🦵",
+info:"שב במכשיר, הצמד את הגב למשענת ויישר את הרגליים בצורה מבוקרת. החזר לאט."
+},
+{
+name:"סקוואט לספסל",
+muscle:"רגליים וישבן",
+sets:3,reps:"10",
+image:"Bodyweight_Squat/0.jpg",
+icon:"🏋️",
+info:"עמוד מול ספסל, כופף את הברכיים והורד את האגן עד נגיעה קלה בספסל. עלה בשליטה."
+},
+{
+name:"דדליפט רומני עם משקולות",
+muscle:"ירך אחורית וישבן",
+sets:2,reps:"10",
+image:"Romanian_Deadlift_With_Dumbbells/0.jpg",
+icon:"🏋️",
+info:"החזק משקולות לצד הגוף, קח את האגן לאחור ושמור על גב ניטרלי. עלה לאט."
+},
+{
+name:"לחיצת חזה עם משקולות",
+muscle:"חזה",
+sets:3,reps:"10–12",
+image:"Dumbbell_Bench_Press/0.jpg",
+icon:"💪",
+info:"שכב על ספסל שטוח, דחוף את המשקולות כלפי מעלה והורד אותן לאט בטווח נוח."
+},
+{
+name:"פולי עליון",
+muscle:"גב",
+sets:3,reps:"10–12",
+image:"Wide-Grip_Lat_Pulldown/0.jpg",
+icon:"🏋️",
+info:"שב מול הפולי ומשוך את המוט לכיוון החזה העליון בלי להניף את הגוף."
+},
+{
+name:"לחיצת כתפיים עם משקולות",
+muscle:"כתפיים",
+sets:2,reps:"10",
+image:"Dumbbell_Shoulder_Press/0.jpg",
+icon:"💪",
+info:"שב עם גב נתמך, החזק משקולות בגובה הכתפיים ודחוף כלפי מעלה בשליטה."
+},
+{
+name:"חתירה עם משקולת על ספסל",
+muscle:"גב אמצעי",
+sets:2,reps:"12 לכל צד",
+image:"One-Arm_Dumbbell_Row/0.jpg",
+icon:"🏋️",
+info:"הישען על הספסל עם יד אחת ומשוך את המשקולת לכיוון המותן. החלף צד."
+},
+{
+name:"כפיפת מרפקים עם משקולות",
+muscle:"יד קדמית",
+sets:2,reps:"12",
+image:"Dumbbell_Bicep_Curl/0.jpg",
+icon:"💪",
+info:"עמוד זקוף, שמור את המרפקים קרובים לגוף והרם את המשקולות בלי תנופה."
+},
+{
+name:"פשיטת מרפקים עם משקולת",
+muscle:"יד אחורית",
+sets:2,reps:"12",
+image:"Seated_Triceps_Press/0.jpg",
+icon:"💪",
+info:"החזק משקולת בשתי ידיים מעל הראש, כופף את המרפקים ויישר אותם בשליטה."
+},
+{
+name:"Bird Dog",
+muscle:"בטן וליבה",
+sets:2,reps:"8 לכל צד",
+image:"Bird_Dog/0.jpg",
+icon:"🧘",
+info:"עמוד על שש, הושט יד ורגל נגדית ושמור על גב יציב. חזור והחלף צד."
+}
+];
+
+let state={};
+try{
+state=JSON.parse(localStorage.getItem("gym-progress-v1")||"{}");
+}catch(e){}
+
+function save(){
+try{
+localStorage.setItem("gym-progress-v1",JSON.stringify(state));
+}catch(e){}
+}
+
+function toggle(i,j){
+if(!state[i])state[i]={};
+state[i][j]=!state[i][j];
+save();
+render();
+}
+
+function resetAll(){
+if(confirm("לאפס את כל הסימונים?")){
+state={};
+save();
+render();
+}
+}
+
+function render(){
+let completed=0,total=0;
+const container=document.getElementById("exercises");
+
+container.innerHTML=data.map((d,i)=>{
+let buttons="";
+for(let j=0;j<d.sets;j++){
+total++;
+const done=Boolean(state[i]&&state[i][j]);
+if(done)completed++;
+buttons+=`<button class="${done?'done':''}" onclick="toggle(${i},${j})">סט ${j+1} ${done?'✓':'○'}</button>`;
+}
+
+return `
+<article class="card">
+<img class="art" src="${base+d.image}" alt="${d.name}" loading="lazy"
+onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+<div class="fallback" style="display:none">${d.icon}</div>
+<h2>${i+1}. ${d.name}</h2>
+<p class="muted">${d.muscle} · ${d.sets} סטים × ${d.reps} חזרות</p>
+<div class="instructions">${d.info}</div>
+<p><strong>סימון סטים:</strong></p>
+<div class="sets">${buttons}</div>
+</article>`;
+}).join("");
+
+document.getElementById("progressText").textContent=`${completed} מתוך ${total} סטים הושלמו`;
+document.getElementById("bar").style.width=(completed/total*100)+"%";
+}
+
+render();
+
+let deadline=0;
+let interval=null;
+let remaining=60;
+
+function update(){
+let t=deadline?Math.max(0,Math.ceil((deadline-Date.now())/1000)):remaining;
+document.getElementById("clock").textContent=
+String(Math.floor(t/60)).padStart(2,"0")+":"+
+String(t%60).padStart(2,"0");
+
+if(deadline&&t===0){
+clearInterval(interval);
+interval=null;
+deadline=0;
+remaining=0;
+}
+}
+
+function startTimer(seconds){
+clearInterval(interval);
+remaining=seconds;
+deadline=Date.now()+seconds*1000;
+update();
+interval=setInterval(update,250);
+}
+
+function stopTimer(){
+if(deadline){
+remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));
+}
+deadline=0;
+clearInterval(interval);
+interval=null;
+update();
+}
+
+function resetTimer(){
+clearInterval(interval);
+interval=null;
+deadline=0;
+remaining=60;
+update();
+}
+
+document.addEventListener("visibilitychange",update);
+update();
+</script>
+</body>
+</html>
